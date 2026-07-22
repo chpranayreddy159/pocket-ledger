@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'core/database/database_helper.dart';
 import 'features/add_transaction/add_transaction_screen.dart';
-import 'shared/models/transaction_model.dart';
 import 'features/analytics/analytics_screen.dart';
+import 'features/budgets/budgets_screen.dart';
+import 'shared/models/transaction_model.dart';
 
 void main() {
   runApp(const PocketLedgerApp());
@@ -141,20 +142,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.analytics_outlined),
+            icon: const Icon(Icons.account_balance_wallet),
+            tooltip: 'Budgets',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BudgetsScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
             tooltip: 'Analytics',
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const AnalyticsScreen(),
-                ),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AnalyticsScreen()),
               );
             },
           ),
           IconButton(
             onPressed: _loadDashboard,
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh',
           ),
         ],
       ),
