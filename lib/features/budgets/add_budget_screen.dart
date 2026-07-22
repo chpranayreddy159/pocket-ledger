@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'providers/budget_provider.dart';
+import '../../shared/models/budget_model.dart';
 
 class AddBudgetScreen extends StatefulWidget {
   const AddBudgetScreen({super.key});

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'providers/budget_provider.dart';
 import 'widgets/budget_card.dart';
 import 'add_budget_screen.dart';
+import '../../shared/models/budget_model.dart';
 
 class BudgetsScreen extends StatefulWidget {
   const BudgetsScreen({super.key});

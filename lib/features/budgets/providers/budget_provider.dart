@@ -1,25 +1,76 @@
 import 'package:flutter/material.dart';
 
-class Budget {
-  final String category;
-  final double spent;
-  final double limit;
-
-  Budget({required this.category, required this.spent, required this.limit});
-}
+import '../../../core/database/database_helper.dart';
+import '../../../shared/models/budget_model.dart';
 
 class BudgetProvider extends ChangeNotifier {
-  final List<Budget> _budgets = [
-    Budget(category: 'Food', spent: 3500, limit: 5000),
-    Budget(category: 'Shopping', spent: 4200, limit: 6000),
-    Budget(category: 'Transport', spent: 1200, limit: 2500),
-    Budget(category: 'Entertainment', spent: 800, limit: 2000),
-  ];
+  final List<Budget> _budgets = [];
 
-  List<Budget> get budgets => _budgets;
+  bool _isLoading = false;
+  String? _errorMessage;
 
-  void addBudget(Budget budget) {
-    _budgets.add(budget);
+  List<Budget> get budgets => List.unmodifiable(_budgets);
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+
+  Future<void> loadBudgets() async {
+    _setLoading(true);
+    _errorMessage = null;
+
+    try {
+      final budgets = await DatabaseHelper.instance.getBudgets();
+
+      _budgets
+        ..clear()
+        ..addAll(budgets);
+    } catch (error) {
+      _errorMessage = 'Unable to load budgets: $error';
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> addBudget(Budget budget) async {
+    _errorMessage = null;
+
+    try {
+      await DatabaseHelper.instance.insertBudget(budget);
+      await loadBudgets();
+    } catch (error) {
+      _errorMessage = 'Unable to save budget: $error';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> updateBudget(Budget budget) async {
+    _errorMessage = null;
+
+    try {
+      await DatabaseHelper.instance.updateBudget(budget);
+      await loadBudgets();
+    } catch (error) {
+      _errorMessage = 'Unable to update budget: $error';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<void> deleteBudget(int id) async {
+    _errorMessage = null;
+
+    try {
+      await DatabaseHelper.instance.deleteBudget(id);
+      await loadBudgets();
+    } catch (error) {
+      _errorMessage = 'Unable to delete budget: $error';
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  void _setLoading(bool value) {
+    _isLoading = value;
     notifyListeners();
   }
 }
