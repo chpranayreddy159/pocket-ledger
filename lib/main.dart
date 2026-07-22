@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'core/database/database_helper.dart';
 import 'features/add_transaction/add_transaction_screen.dart';
 import 'shared/models/transaction_model.dart';
+import 'features/analytics/analytics_screen.dart';
 
 void main() {
   runApp(const PocketLedgerApp());
@@ -139,6 +140,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Pocket Ledger'),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.analytics_outlined),
+            tooltip: 'Analytics',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const AnalyticsScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             onPressed: _loadDashboard,
             icon: const Icon(Icons.refresh),
