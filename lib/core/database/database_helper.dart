@@ -1,6 +1,7 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../../shared/models/budget_model.dart';
 import '../../shared/models/transaction_model.dart';
 import 'tables.dart';
 
@@ -24,10 +25,30 @@ class DatabaseHelper {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'pocket_ledger.db');
 
-    return openDatabase(path, version: 1, onCreate: _createDatabase);
+    return openDatabase(
+      path,
+      version: 2,
+      onCreate: _createDatabase,
+      onUpgrade: _upgradeDatabase,
+    );
   }
 
   Future<void> _createDatabase(Database db, int version) async {
+    await _createTransactionsTable(db);
+    await _createBudgetsTable(db);
+  }
+
+  Future<void> _upgradeDatabase(
+    Database db,
+    int oldVersion,
+    int newVersion,
+  ) async {
+    if (oldVersion < 2) {
+      await _createBudgetsTable(db);
+    }
+  }
+
+  Future<void> _createTransactionsTable(Database db) async {
     await db.execute('''
       CREATE TABLE ${Tables.transactions} (
         ${Tables.id} INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,6 +58,17 @@ class DatabaseHelper {
         ${Tables.category} TEXT NOT NULL,
         ${Tables.date} TEXT NOT NULL,
         ${Tables.note} TEXT NOT NULL
+      )
+    ''');
+  }
+
+  Future<void> _createBudgetsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS budgets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category TEXT NOT NULL UNIQUE,
+        budget_limit REAL NOT NULL,
+        spent REAL NOT NULL DEFAULT 0
       )
     ''');
   }
@@ -141,6 +173,61 @@ class DatabaseHelper {
     }
 
     return (value as num).toDouble();
+  }
+
+  Future<int> insertBudget(Budget budget) async {
+    final db = await database;
+
+    final data = budget.toMap();
+    data.remove('id');
+
+    return db.insert('budgets', {
+      'category': data['category'],
+      'budget_limit': data['limit'],
+      'spent': data['spent'],
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<List<Budget>> getBudgets() async {
+    final db = await database;
+
+    final result = await db.query('budgets', orderBy: 'category ASC');
+
+    return result
+        .map(
+          (row) => Budget(
+            id: row['id'] as int?,
+            category: row['category'] as String,
+            limit: (row['budget_limit'] as num).toDouble(),
+            spent: (row['spent'] as num).toDouble(),
+          ),
+        )
+        .toList();
+  }
+
+  Future<int> updateBudget(Budget budget) async {
+    if (budget.id == null) {
+      throw ArgumentError('Budget ID is required for update.');
+    }
+
+    final db = await database;
+
+    return db.update(
+      'budgets',
+      {
+        'category': budget.category,
+        'budget_limit': budget.limit,
+        'spent': budget.spent,
+      },
+      where: 'id = ?',
+      whereArgs: [budget.id],
+    );
+  }
+
+  Future<int> deleteBudget(int id) async {
+    final db = await database;
+
+    return db.delete('budgets', where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> closeDatabase() async {
