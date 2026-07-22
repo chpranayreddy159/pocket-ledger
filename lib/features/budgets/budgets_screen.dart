@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'providers/budget_provider.dart';
 import 'widgets/budget_card.dart';
+import 'add_budget_screen.dart';
 
 class BudgetsScreen extends StatefulWidget {
   const BudgetsScreen({super.key});
@@ -32,10 +33,6 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
     }
   }
 
-  void _addSampleBudget() {
-    _provider.addBudget(Budget(category: 'Health', spent: 500, limit: 3000));
-  }
-
   @override
   Widget build(BuildContext context) {
     final budgets = _provider.budgets;
@@ -58,7 +55,12 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
               },
             ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _addSampleBudget,
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddBudgetScreen()),
+          );
+        },
         icon: const Icon(Icons.add),
         label: const Text('Add Budget'),
       ),
