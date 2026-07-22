@@ -56,10 +56,13 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          await Navigator.push(
-            context,
+          final budget = await Navigator.of(context).push<Budget>(
             MaterialPageRoute(builder: (_) => const AddBudgetScreen()),
           );
+
+          if (budget != null) {
+            _provider.addBudget(budget);
+          }
         },
         icon: const Icon(Icons.add),
         label: const Text('Add Budget'),
