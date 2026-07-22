@@ -23,50 +23,28 @@ class BudgetProvider extends ChangeNotifier {
       _budgets
         ..clear()
         ..addAll(budgets);
-    } catch (error) {
-      _errorMessage = 'Unable to load budgets: $error';
-    } finally {
-      _setLoading(false);
+    } catch (e) {
+      _errorMessage = e.toString();
     }
+
+    _setLoading(false);
   }
 
   Future<void> addBudget(Budget budget) async {
-    _errorMessage = null;
-
-    try {
-      await DatabaseHelper.instance.insertBudget(budget);
-      await loadBudgets();
-    } catch (error) {
-      _errorMessage = 'Unable to save budget: $error';
-      notifyListeners();
-      rethrow;
-    }
+    await DatabaseHelper.instance.insertBudget(budget);
+    await loadBudgets();
   }
 
   Future<void> updateBudget(Budget budget) async {
-    _errorMessage = null;
-
-    try {
-      await DatabaseHelper.instance.updateBudget(budget);
-      await loadBudgets();
-    } catch (error) {
-      _errorMessage = 'Unable to update budget: $error';
-      notifyListeners();
-      rethrow;
-    }
+    await DatabaseHelper.instance.updateBudget(budget);
+    await loadBudgets();
   }
 
-  Future<void> deleteBudget(int id) async {
-    _errorMessage = null;
+  Future<void> deleteBudget(Budget budget) async {
+    if (budget.id == null) return;
 
-    try {
-      await DatabaseHelper.instance.deleteBudget(id);
-      await loadBudgets();
-    } catch (error) {
-      _errorMessage = 'Unable to delete budget: $error';
-      notifyListeners();
-      rethrow;
-    }
+    await DatabaseHelper.instance.deleteBudget(budget.id!);
+    await loadBudgets();
   }
 
   void _setLoading(bool value) {

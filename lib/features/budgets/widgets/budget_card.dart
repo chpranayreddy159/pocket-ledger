@@ -4,12 +4,14 @@ class BudgetCard extends StatelessWidget {
   final String category;
   final double spent;
   final double limit;
+  final VoidCallback? onDelete;
 
   const BudgetCard({
     super.key,
     required this.category,
     required this.spent,
     required this.limit,
+    this.onDelete,
   });
 
   @override
@@ -23,9 +25,21 @@ class BudgetCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              category,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  category,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: onDelete,
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             LinearProgressIndicator(value: progress, minHeight: 10),

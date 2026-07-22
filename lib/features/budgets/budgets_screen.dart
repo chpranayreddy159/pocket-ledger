@@ -119,6 +119,29 @@ class _BudgetsScreenState extends State<BudgetsScreen> {
                     category: budget.category,
                     spent: budget.spent,
                     limit: budget.limit,
+                    onDelete: () async {
+                      final delete = await showDialog<bool>(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text("Delete Budget"),
+                          content: Text("Delete '${budget.category}' budget?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text("Cancel"),
+                            ),
+                            FilledButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text("Delete"),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (delete == true) {
+                        await _provider.deleteBudget(budget);
+                      }
+                    },
                   );
                 },
               ),
